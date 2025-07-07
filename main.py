@@ -14,18 +14,15 @@ pao2 = st.slider('PaO2 в мм.рт.ст.', 1, 250, 1)
 fio2 = st.slider('FiO2 в %', 21, 100, 21)
 respiratory_index = pao2 / (fio2 / 100)
 
-respiratory_support = st.radio('Респираторная поддержка',
-                             ['Нет', 'Да'])
-
 if respiratory_index > 400:
     respiratory_score = 0
-elif 300 < respiratory_index <= 400 :
+elif 300 < respiratory_index <= 400:
     respiratory_score = 1
-elif 10 < respiratory_index <= 300 and respiratory_support != 'Да':
+elif 200 < respiratory_index <= 300:
     respiratory_score = 2
-elif 100 < respiratory_index <= 200 and respiratory_support == 'Да':
+elif 100 < respiratory_index <= 200:
     respiratory_score = 3
-elif respiratory_index <= 100 and respiratory_support == 'Да':
+elif respiratory_index <= 100:
     respiratory_score = 4
 
 st.write(f"Респираторный индекс: {respiratory_index:.1f} → {respiratory_score} балл(ов)")
