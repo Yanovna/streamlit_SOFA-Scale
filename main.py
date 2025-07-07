@@ -17,7 +17,6 @@ respiratory_index = pao2 / (fio2 / 100)
 respiratory_support = st.radio('Респираторная поддержка',
                              ['Нет', 'Да'])
 
-# Расчет баллов за дыхательную систему
 if respiratory_index > 400:
     respiratory_score = 0
 elif 300 < respiratory_index <= 400 :
