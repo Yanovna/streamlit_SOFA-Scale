@@ -1,4 +1,7 @@
 import streamlit as st
+from docx import Document
+from io import BytesIO
+from datetime import datetime
 
 
 def init_session_state():
@@ -36,7 +39,7 @@ def calculate_respiratory_score():
 
 def calculate_nervous_score():
     st.subheader('2. Шкала комы Глазго (ШКГ)')
-    gcs = st.slider('Общий балл ШКГ (3-15)', 3, 15, 15)
+    gcs = st.slider('Общий балл ШКГ (3-15)', 1, 15, 1)
 
     if gcs == 15:
         score = 0
@@ -127,6 +130,37 @@ def calculate_renal_score():
     st.session_state.scores['renal'] = score_map[option]
 
 
+def generate_report():
+    doc = Document()
+
+    doc.add_heading('Отчёт по шкале SOFA', level=1)
+
+    doc.add_paragraph(f"Дата: {datetime.now().strftime('%d.%m.%Y %H:%M')}")
+
+    doc.add_paragraph(f"Общий балл SOFA: {st.session_state.total_score}")
+
+    doc.add_heading("Детализация баллов:", level=2)
+
+    def format_score(score):
+        if score == 1:
+            return f"{score} балл"
+        elif 2 <= score <= 4:
+            return f"{score} балла"
+        else:
+            return f"{score} баллов"
+
+    doc.add_paragraph(f"1. Респираторный индекс: {format_score(st.session_state.scores['respiratory'])}")
+    doc.add_paragraph(f"2. Шкала комы Глазго: {format_score(st.session_state.scores['nervous'])}")
+    doc.add_paragraph(f"3. СCC: {format_score(st.session_state.scores['cardiovascular'])}")
+    doc.add_paragraph(f"4. Билирубин: {format_score(st.session_state.scores['liver'])}")
+    doc.add_paragraph(f"5. Тромбоциты: {format_score(st.session_state.scores['coagulation'])}")
+    doc.add_paragraph(f"6. Почечная функция: {format_score(st.session_state.scores['renal'])}")
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
 def show_results():
     st.header("Результаты оценки SOFA")
 
@@ -150,6 +184,13 @@ def show_results():
     else:
         st.error("Крайне тяжелая органная дисфункция (высокий риск летальности)")
 
+    report = generate_report()
+    st.download_button(
+        label="📥 Скачать отчёт (DOCX)",
+        data=report,
+        file_name=f"SOFA_отчёт_{datetime.now().strftime('%Y%m%d')}.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
 def main():
     st.title("Шкала SOFA (Sequential Organ Failure Assessment)")
